@@ -7,6 +7,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+RUN npx prisma generate
 
 EXPOSE 3000
-CMD ["node", "--import", "tsx", "src/server.ts"]
+# Aplica as migrations pendentes e sobe a API. O exec faz o Node assumir o processo e receber o sinal de parada.
+CMD ["sh", "-c", "npx prisma migrate deploy && exec node --import tsx src/server.ts"]

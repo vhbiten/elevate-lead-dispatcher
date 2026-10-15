@@ -1,0 +1,193 @@
+// Modelo do banco. As decisões de modelagem e os índices estão explicados em docs/decisoes.md.
+// Os campos usam snake_case: o mesmo nome no banco, no código e na API.
+// Exclusões que apagariam histórico são bloqueadas (onDelete: Restrict): cadastros são desativados, não apagados.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum LeadStatus {
+  new
+  contacted
+  no_answer
+  callback
+  qualified
+  sale
+  refund
+  invalid
+
+  @@map("lead_status")
+}
+
+// De onde veio um evento de status.
+enum EventSource {
+  system // criação do lead
+  webhook // call center
+  panel // usuário no painel
+
+  @@map("event_source")
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+
+  @@map("user_role")
+}
+
+model Product {
+  id         Int      @id @default(autoincrement())
+  slug       String   @unique
+  name       String
+  active     Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  funnels Funnel[]
+  leads   Lead[]
+
+  @@map("products")
+}
+
+model Funnel {
+  id         Int      @id @default(autoincrement())
+  product_id Int
+  slug       String
+  name       String
+  active     Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  product Product @relation(fields: [product_id], references: [id])
+  leads   Lead[]
+
+  // O mesmo slug (ex.: vsl-01) pode existir em produtos diferentes.
+  @@unique([product_id, slug])
+  @@map("funnels")
+}
+
+model Affiliate {
+  id         Int      @id @default(autoincrement())
+  // O affiliate_id que chega no lead: é o código do afiliado na plataforma de origem.
+  code       String   @unique
+  created_at DateTime @default(now()) @db.Timestamptz(3)
+
+  leads Lead[]
+
+  @@map("affiliates")
+}
+
+model CallCenter {
+  id             Int      @id @default(autoincrement())
+  slug           String   @unique
+  name           String
+  weight         Int
+  active         Boolean  @default(true)
+  // Leads recebidos desde a última mudança de configuração; base da regra do dispatcher.
+  assigned_count Int      @default(0)
+  webhook_secret String
+  created_at     DateTime @default(now()) @db.Timestamptz(3)
+
+  leads         Lead[]
+  distributions Distribution[]
+  status_events LeadStatusEvent[]
+  users         User[]
+
+  @@map("call_centers")
+}
+
+model Lead {
+  // UUID v7, gerado pelo Postgres: cresce em ordem de tempo, então o índice recebe as inserções no fim.
+  id                String     @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  dedup_key         String     @unique
+  name              String
+  email             String
+  phone             String
+  product_id        Int
+  funnel_id         Int
+  affiliate_id      Int?
+  source            String?
+  campaign          String?
+  utm_source        String?
+  utm_medium        String?
+  utm_campaign      String?
+  utm_content       String?
+  utm_term          String?
+  status            LeadStatus @default(new)
+  // Horário do último evento aplicado: é com ele que um evento fora de ordem é reconhecido.
+  status_updated_at DateTime   @default(now()) @db.Timestamptz(3)
+  // Call center atual; o histórico de distribuições fica em distributions.
+  call_center_id    Int?
+  created_at        DateTime   @default(now()) @db.Timestamptz(3)
+
+  product       Product           @relation(fields: [product_id], references: [id])
+  funnel        Funnel            @relation(fields: [funnel_id], references: [id])
+  affiliate     Affiliate?        @relation(fields: [affiliate_id], references: [id], onDelete: Restrict)
+  call_center   CallCenter?       @relation(fields: [call_center_id], references: [id], onDelete: Restrict)
+  distributions Distribution[]
+  status_events LeadStatusEvent[]
+
+  @@index([created_at])
+  @@index([call_center_id, created_at])
+  @@index([status, created_at])
+  @@index([product_id, created_at])
+  @@map("leads")
+}
+
+model Distribution {
+  id             Int      @id @default(autoincrement())
+  lead_id        String   @db.Uuid
+  call_center_id Int
+  // Id do lead no sistema do call center, informado no primeiro webhook.
+  external_id    String?
+  distributed_at DateTime @default(now()) @db.Timestamptz(3)
+
+  lead        Lead       @relation(fields: [lead_id], references: [id])
+  call_center CallCenter @relation(fields: [call_center_id], references: [id])
+
+  @@index([lead_id])
+  @@map("distributions")
+}
+
+// Histórico de status: só recebe inserções, aplicadas ou não, para auditoria.
+model LeadStatusEvent {
+  id             Int         @id @default(autoincrement())
+  lead_id        String      @db.Uuid
+  status         LeadStatus
+  // Horário informado pelo call center (ou o momento da mudança, no painel).
+  occurred_at    DateTime    @db.Timestamptz(3)
+  received_at    DateTime    @default(now()) @db.Timestamptz(3)
+  source         EventSource
+  call_center_id Int?
+  user_id        Int?
+  external_id    String?
+  // false quando o evento foi registrado mas não mudou o status (ex.: chegou fora de ordem).
+  applied        Boolean
+  reason         String?
+
+  lead        Lead        @relation(fields: [lead_id], references: [id])
+  call_center CallCenter? @relation(fields: [call_center_id], references: [id], onDelete: Restrict)
+  user        User?       @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  // Identidade do evento: o mesmo webhook recebido de novo bate nesta restrição e é descartado.
+  @@unique([lead_id, status, occurred_at])
+  @@map("lead_status_events")
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  password_hash  String
+  role           UserRole
+  // Obrigatório para OPERATOR e vazio para ADMIN (garantido por CHECK na migration).
+  call_center_id Int?
+  created_at     DateTime @default(now()) @db.Timestamptz(3)
+
+  call_center   CallCenter?       @relation(fields: [call_center_id], references: [id], onDelete: Restrict)
+  status_events LeadStatusEvent[]
+
+  @@map("users")
+}

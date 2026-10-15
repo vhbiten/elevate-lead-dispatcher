@@ -12,3 +12,51 @@ Registro das decisões de construção: como o sistema é feito, e não o que el
 
 - **Decisão:** o Node 24 lê o `.env` com `--env-file-if-exists`, então não há a dependência `dotenv`. No Docker, as variáveis vêm do `docker-compose.yml`.
 - **Por quê:** uma dependência a menos para um recurso que o runtime já oferece.
+
+## Prisma 7 com o adapter do Postgres
+
+- **Decisão:** Prisma 7.10, fixado na versão exata (a tag `latest` do npm aponta para o 8.0, ainda em release candidate), com o cliente gerado em `src/generated/prisma` (fora do Git) e o adapter `@prisma/adapter-pg`. A migration roda na subida do container (`prisma migrate deploy`).
+- **Por quê:** o schema documenta o modelo num arquivo só, as migrations ficam versionadas em SQL e as consultas comuns ficam legíveis. Os pontos de concorrência usam SQL escrito à mão, via `$queryRaw`.
+- **Custo:** o `npm audit` aponta alertas em `mysql2` e `deepmerge-ts`, dependências internas do CLI do Prisma. Eles não chegam à API: o `mysql2` só é usado com MySQL, e o `deepmerge-ts` só processa o arquivo de configuração do próprio projeto. A correção sugerida pelo npm rebaixaria para o Prisma 6. Migration na subida do container serve para uma instância; com várias réplicas, ela viraria uma etapa separada do deploy.
+
+## Modelo do banco
+
+O schema está em `backend/prisma/schema.prisma`, e a migration em `backend/prisma/migrations/`.
+
+| Tabela | Papel |
+|---|---|
+| `products`, `funnels` | produtos e seus funis; o mesmo slug de funil pode existir em produtos diferentes |
+| `affiliates` | afiliados, identificados pelo código da plataforma de origem |
+| `call_centers` | operações de atendimento, com peso, contador do dispatcher e segredo do webhook |
+| `leads` | o lead, com rastreamento, status atual e call center atual |
+| `distributions` | cada distribuição de um lead para um call center |
+| `lead_status_events` | histórico de status, aplicado ou não |
+| `users` | login, com perfil e call center |
+
+### Decisões
+
+1. **O lead usa UUID v7, gerado pelo Postgres 18. As outras tabelas usam inteiro.** O id do lead sai para sistemas externos, então não pode ser um contador, que revelaria o volume de leads e deixaria adivinhar outros ids. O v7 tem 74 bits aleatórios e começa pelo horário de criação: com milhões de linhas, o índice da chave primária recebe as inserções sempre no fim, em vez de espalhadas como no UUID v4. Nas tabelas de cadastro, o inteiro deixa as chaves estrangeiras dentro de `leads` com 4 bytes em vez de 16.
+2. **O call center atual fica no lead, e `distributions` guarda o histórico.** Filtrar por call center é a consulta mais frequente (todo OPERATOR faz isso em toda tela), então `leads.call_center_id` tem índice e dispensa join. A tabela `distributions` registra cada distribuição e já comporta uma redistribuição futura.
+3. **O status atual é uma coluna do lead, e o histórico só recebe inserções.** O status é um `enum` do Postgres porque a lista faz parte do contrato com o call center. `status_updated_at` guarda o horário do último evento aplicado, que é a referência para reconhecer evento fora de ordem. A criação do lead também gera um evento (`source = system`), então o histórico começa com o lead.
+4. **Integridade no banco, e não só no código.** Restrições `CHECK` garantem peso e contador não negativos e que OPERATOR sempre tem call center e ADMIN nunca tem. O Prisma não declara `CHECK`, então elas foram escritas à mão no fim da migration. As chaves estrangeiras bloqueiam exclusões (`ON DELETE RESTRICT`): call centers e afiliados são desativados, nunca apagados, para não perder o histórico.
+5. **Um nome só para cada campo.** As colunas usam snake_case, que é o mesmo nome no banco, no código e na API (que já usa snake_case, como no exemplo do enunciado). Não há tradução entre camadas, e o SQL escrito à mão fica legível.
+
+### Índices
+
+Cada índice acelera uma consulta, mas deixa a inserção de leads mais lenta, e a inserção é o caminho crítico do sistema. Por isso só entram índices ligados a uma consulta real.
+
+| Índice | Consulta que atende |
+|---|---|
+| `leads(dedup_key)` único | detectar lead repetido |
+| `leads(created_at)` | lista padrão ordenada por data, filtro por período, "leads hoje" |
+| `leads(call_center_id, created_at)` | lista do OPERATOR e filtro por call center, já na ordem de data |
+| `leads(status, created_at)` | filtro por status e contagem de pendentes e vendas |
+| `leads(product_id, created_at)` | filtro por produto (o funil é sempre escolhido dentro de um produto) |
+| `lead_status_events(lead_id, status, occurred_at)` único | descartar webhook repetido e listar o histórico de um lead |
+| `distributions(lead_id)` | distribuições de um lead, no detalhe |
+
+Ficam sem índice, de propósito:
+
+- `leads.source`: poucos valores distintos, sempre filtrado junto com o período.
+- `leads.email`: a duplicidade é resolvida pela `dedup_key`.
+- `leads.affiliate_id`: nenhuma tela consulta por afiliado.

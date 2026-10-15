@@ -9,3 +9,6 @@ coverage/
 .env
 .env.*
 !.env.example
+
+# cliente do Prisma: gerado a partir do schema (npm run db:generate)
+backend/src/generated/
