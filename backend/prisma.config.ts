@@ -8,6 +8,7 @@ export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: {
     path: 'prisma/migrations',
+    seed: 'tsx prisma/seed.ts',
   },
   datasource: {
     // Só as migrations precisam da URL; o "prisma generate" roda sem ela no build da imagem.

@@ -60,3 +60,9 @@ Ficam sem índice, de propósito:
 - `leads.source`: poucos valores distintos, sempre filtrado junto com o período.
 - `leads.email`: a duplicidade é resolvida pela `dedup_key`.
 - `leads.affiliate_id`: nenhuma tela consulta por afiliado.
+
+## Seed na subida do container
+
+- **Decisão:** o seed cria produtos, funis, call centers e usuários fictícios e roda em toda subida do container, logo depois das migrations. Todo `upsert` usa `update: {}`, então rodar de novo não altera o que já existe (como pesos mudados pelo ADMIN).
+- **Por quê:** quem for avaliar roda `docker compose up` e já encontra dados e usuários para entrar, sem nenhum passo manual.
+- **Senhas:** `bcryptjs` (bcrypt implementado em JavaScript) em vez do pacote nativo `bcrypt`, que exige compilação na imagem Alpine e um script de instalação que o npm 11 bloqueia por padrão. O algoritmo e o formato do hash são os mesmos.

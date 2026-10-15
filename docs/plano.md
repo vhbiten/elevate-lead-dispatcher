@@ -13,7 +13,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 - [x] Backend Express com TypeScript e rota `GET /api/health`
 - [x] Docker Compose com Postgres e backend
 - [x] Schema do banco e primeira migration, com o modelo explicado em `docs/decisoes.md`
-- [ ] Seed: produtos e funis fictícios, call centers A, B e C (com segredos de desenvolvimento) e usuários
+- [x] Seed: produtos e funis fictícios, call centers A, B e C (com segredos de desenvolvimento) e usuários
 
 **Pronto quando:** `docker compose up` sobe banco e backend, `/api/health` responde e o banco tem os dados do seed.
 
