@@ -53,7 +53,7 @@ Depois do núcleo, nesta ordem: login e permissões, painel, filtros. Se faltar 
 | `affiliate_id` | não | texto até 64 (o exemplo manda `"999"` como texto) |
 | `utm` | não | objeto com `source`, `medium`, `campaign`, `content` e `term`, todos texto opcional até 255 |
 
-Campos fora da lista são ignorados. O lead recebe um UUID e a data e hora de criação, gravados pelo banco.
+Campos fora da lista são ignorados. Campo opcional vazio (`""`), só com espaços ou `null` conta como não enviado: formulários costumam mandar campos escondidos vazios, e um `affiliate_id` vazio não pode virar um afiliado. O lead recebe um UUID e a data e hora de criação, gravados pelo banco.
 
 ### Respostas
 

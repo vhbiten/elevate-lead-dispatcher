@@ -19,7 +19,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 
 ## Fase 2: recebimento de leads
 
-- [ ] Validação do payload com Zod, com testes unitários
+- [x] Validação do payload com Zod, com testes unitários
 - [ ] `POST /api/leads` grava o lead com produto, funil, afiliado e origem, com teste de integração
 - [ ] Lead repetido devolve o original (chave de duplicidade), com testes
 
