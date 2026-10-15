@@ -11,7 +11,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 ## Fase 1: base
 
 - [x] Backend Express com TypeScript e rota `GET /api/health`
-- [ ] Docker Compose com Postgres e backend
+- [x] Docker Compose com Postgres e backend
 - [ ] Schema do banco e primeira migration, com o modelo explicado em `docs/decisoes.md`
 - [ ] Seed: produtos e funis fictícios, call centers A, B e C (com segredos de desenvolvimento) e usuários
 

@@ -1,0 +1,34 @@
+# Ambiente de desenvolvimento e avaliação: os valores abaixo são só para uso local.
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: elevate
+      POSTGRES_PASSWORD: elevate
+      POSTGRES_DB: elevate
+    ports:
+      - "5432:5432"
+    volumes:
+      # No Postgres 18 o volume vai em /var/lib/postgresql (e não mais em .../data).
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U elevate -d elevate"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+  backend:
+    build: ./backend
+    # O tini (init) repassa o sinal de parada ao Node, que assim encerra na hora.
+    init: true
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://elevate:elevate@db:5432/elevate
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
