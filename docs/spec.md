@@ -280,4 +280,4 @@ Os testes de integração rodam contra um Postgres de verdade (o do docker compo
 | Testes | Vitest e supertest | testam a API sem subir servidor |
 | Execução | Docker Compose | `docker compose up` sobe banco, backend e frontend |
 
-Não há Redis, fila nem worker. A concorrência se resolve com transação e bloqueio no Postgres, e cada peça a mais seria algo para operar e explicar sem ganho neste volume.
+Não há Redis, fila nem worker. A concorrência se resolve com transação e bloqueio no Postgres, e cada peça a mais seria algo para operar e manter sem ganho neste volume.
