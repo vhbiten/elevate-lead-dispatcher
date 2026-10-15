@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+.vite/
+*.log
+.DS_Store
+
+# segredos: só o .env.example vai para o Git
+.env
+.env.*
+!.env.example
