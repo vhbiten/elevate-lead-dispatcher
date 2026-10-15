@@ -6,7 +6,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 
 - [x] Especificação (`docs/spec.md`)
 - [x] Plano (este arquivo)
-- [ ] `CLAUDE.md` com as regras do projeto e registro do uso de IA (`docs/ia.md`)
+- [x] `CLAUDE.md` com as regras do projeto e registro do uso de IA (`docs/ia.md`)
 
 ## Fase 1: base
 
