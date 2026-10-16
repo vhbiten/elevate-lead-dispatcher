@@ -9,12 +9,14 @@
     "noEmit": true,
     "types": [
       "node"
-    ]
+    ],
+    "allowImportingTsExtensions": true
   },
   "include": [
     "src",
     "tests",
     "prisma",
-    "prisma.config.ts"
+    "prisma.config.ts",
+    "vitest.config.ts"
   ]
 }

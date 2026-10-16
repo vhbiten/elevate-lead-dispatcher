@@ -66,3 +66,9 @@ Ficam sem índice, de propósito:
 - **Decisão:** o seed cria produtos, funis, call centers e usuários fictícios e roda em toda subida do container, logo depois das migrations. Todo `upsert` usa `update: {}`, então rodar de novo não altera o que já existe (como pesos mudados pelo ADMIN).
 - **Por quê:** quem for avaliar roda `docker compose up` e já encontra dados e usuários para entrar, sem nenhum passo manual.
 - **Senhas:** `bcryptjs` (bcrypt implementado em JavaScript) em vez do pacote nativo `bcrypt`, que exige compilação na imagem Alpine e um script de instalação que o npm 11 bloqueia por padrão. O algoritmo e o formato do hash são os mesmos.
+
+## Testes de integração contra o Postgres real
+
+- **Decisão:** os testes de integração chamam a API com supertest e gravam num Postgres de verdade: o banco `elevate_test`, no mesmo container do compose, criado por `backend/prisma/create-test-db.sql` quando o volume nasce. Antes da suíte, as migrations e o seed são aplicados nele. Cada teste começa com as tabelas de lead vazias (`TRUNCATE`), e os arquivos rodam um de cada vez, porque dividem o banco.
+- **Por quê:** o que mais importa testar aqui (unicidade, transações, concorrência) é comportamento do banco. Um mock ou um banco em memória aprovaria código que falha no Postgres.
+- **Organização:** o Vitest tem dois projetos. `unit` cobre regras puras e roda sem Docker (`npm run test:unit`); `integration` precisa do banco no ar (`npm test` roda os dois).
