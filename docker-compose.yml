@@ -26,6 +26,8 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://elevate:elevate@db:5432/elevate
       JWT_SECRET: dev-only-jwt-secret-troque-em-producao
+      # O painel chega pelo nginx: o IP real do cliente vem no X-Forwarded-For (1 proxy na frente).
+      TRUST_PROXY: 1
       # Usado só pelos testes de integração (npm test dentro do container).
       TEST_DATABASE_URL: postgresql://elevate:elevate@db:5432/elevate_test
     ports:
@@ -33,6 +35,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    # O painel e a API na mesma origem: http://localhost:8080 serve o front e repassa /api para o backend.
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
 
 volumes:
   db-data:

@@ -135,3 +135,9 @@ Ficam sem índice, de propósito:
 - **Decisão:** React com Vite, navegação por abas no estado do `App`, chamadas à API por um `api.ts` com `fetch` e CSS próprio. Nenhuma regra de negócio na tela: a tela esconde o que o perfil não usa, e a API decide permissão e transição de status (uma mudança barrada volta como erro e aparece na tela).
 - **Por quê:** são quatro telas atrás de login. Roteador, biblioteca de componentes e gerenciador de estado seriam dependências para manter sem necessidade neste tamanho.
 - **Custo:** as telas não têm URL própria (recarregar a página volta para a aba inicial, e não dá para mandar o link de um lead). Com mais telas, entraria o `react-router`.
+
+## nginx na frente: painel e API na mesma origem
+
+- **Decisão:** no Docker, um nginx serve o build do React e repassa `/api` para o backend (`http://localhost:8080`). Em desenvolvimento, o proxy do Vite faz o mesmo papel. O backend usa `TRUST_PROXY=1` para ler o IP real do cliente no `X-Forwarded-For`.
+- **Por quê:** com uma origem só, o cookie `SameSite=Strict` funciona e o painel não precisa de CORS. A imagem final do frontend leva só o nginx e os arquivos gerados, sem Node.
+- **Custo:** a porta 3000 do backend continua aberta no compose, para o recebimento de leads e os scripts. Quem chama a porta 3000 direto pode forjar o `X-Forwarded-For` e escapar do limite por IP; em produção, só o proxy ficaria exposto.
