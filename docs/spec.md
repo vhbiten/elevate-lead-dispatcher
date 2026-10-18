@@ -131,7 +131,7 @@ A API recalcula a assinatura e compara em tempo constante (`crypto.timingSafeEqu
 
 HMAC em vez de uma chave fixa no cabeçalho porque a assinatura prova que o corpo não foi alterado no caminho e o segredo nunca trafega. É o padrão de Stripe, GitHub e Shopify.
 
-O segredo fica no banco, na tabela do call center, e nunca é devolvido pela API. Um script em `scripts/` assina e envia webhooks de teste, para a demonstração e para quem for avaliar.
+O segredo fica no banco, na tabela do call center, e nunca é devolvido pela API. O script `backend/scripts/send-webhook.ts` assina e envia webhooks de teste, para a demonstração e para quem for avaliar (`docker compose exec backend npm run webhook -- <lead_id> <status>`).
 
 ### Corpo
 
