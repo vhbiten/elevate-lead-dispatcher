@@ -194,6 +194,7 @@ O OPERATOR também muda status pelo painel. Essa mudança passa pelas mesmas reg
 - **Toda checagem acontece no backend.** As rotas administrativas exigem ADMIN. Toda consulta de leads feita por OPERATOR recebe o filtro do call center dele dentro do próprio serviço, e não na tela.
 - Um OPERATOR que tenta abrir um lead de outro call center recebe `404`, igual a um lead que não existe. Um OPERATOR que chama uma rota de ADMIN recebe `403`.
 - O login tem limite de tentativas: 5 a cada 15 minutos para o mesmo IP e e-mail.
+- A sessão não é revogada no servidor: o logout apaga o cookie, e um token copiado antes disso vale até expirar. Por isso a duração é curta (8 horas).
 
 ## 11. Painel
 

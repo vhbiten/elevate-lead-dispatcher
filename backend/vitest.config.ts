@@ -13,7 +13,10 @@ export default defineConfig({
         test: {
           name: 'integration',
           include: ['tests/integration/**/*.test.ts'],
-          env: { DATABASE_URL: TEST_DATABASE_URL },
+          env: {
+            DATABASE_URL: TEST_DATABASE_URL,
+            JWT_SECRET: 'test-only-secret',
+          },
           globalSetup: ['tests/integration/global-setup.ts'],
           setupFiles: ['tests/integration/setup.ts'],
           // Os arquivos dividem o mesmo banco, então rodam um de cada vez.

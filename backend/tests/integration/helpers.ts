@@ -1,3 +1,5 @@
+import type { Express } from 'express';
+import request from 'supertest';
 import { prisma } from '../../src/db';
 
 // Volta o banco de teste ao estado do seed: sem leads e com os contadores do dispatcher zerados.
@@ -20,4 +22,19 @@ export function validLead(overrides: Record<string, unknown> = {}) {
     utm: { source: 'facebook', medium: 'cpc', campaign: 'campaign-123', content: 'ad-01' },
     ...overrides,
   };
+}
+
+// Usuários do seed; todos com a senha de desenvolvimento.
+export const DEV_PASSWORD = 'elevate123';
+export const ADMIN = 'admin@elevate.test';
+export const OPERATOR_A = 'operador.a@elevate.test';
+export const OPERATOR_B = 'operador.b@elevate.test';
+
+// Faz login e devolve o cabeçalho Cookie da sessão, para as próximas requisições.
+export async function loginAs(app: Express, email: string): Promise<string> {
+  const response = await request(app).post('/api/auth/login').send({ email, password: DEV_PASSWORD });
+  if (response.status !== 200) throw new Error(`login de ${email} falhou: ${response.status}`);
+  const cookie = response.get('Set-Cookie')?.[0];
+  if (!cookie) throw new Error('login sem cookie');
+  return cookie.split(';')[0];
 }

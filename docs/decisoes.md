@@ -93,3 +93,10 @@ Ficam sem índice, de propósito:
 - **Evento único:** o evento é gravado com `INSERT ... ON CONFLICT (lead_id, status, occurred_at) DO NOTHING RETURNING id`. Sem linha de volta, o evento é repetido e nada muda.
 - **Como foi verificado:** sem o `FOR UPDATE`, o teste de eventos simultâneos falha; sem o `ON CONFLICT`, os testes de webhook repetido falham.
 - **Custo:** o segredo de cada call center fica em texto no banco, porque o HMAC precisa dele para recalcular a assinatura. Em produção, ele ficaria criptografado no banco, ou num cofre de segredos.
+
+## Sessão: JWT em cookie, sem tabela de sessões
+
+- **Decisão:** o login gera um JWT (HS256, 8 horas) com o id, o perfil e o call center do usuário, gravado num cookie `httpOnly` e `SameSite=Strict`. As rotas conferem a assinatura e usam o perfil do token, sem consultar o banco. O algoritmo é fixo na verificação, então um token que declare outro algoritmo é recusado.
+- **Por quê:** é o que a spec pede, e dispensa uma tabela de sessões. O cookie `httpOnly` deixa o token fora do alcance do JavaScript da página; o `SameSite=Strict` impede que outro site use a sessão.
+- **Custo:** não dá para derrubar uma sessão antes de ela expirar. Se um usuário for removido ou mudar de perfil, o token antigo continua valendo até 8 horas (só o `GET /api/auth/me` confere o usuário no banco). Para revogação imediata, entraria uma lista de tokens revogados ou uma tabela de sessões.
+- **E-mail inexistente:** o login roda o bcrypt mesmo quando o e-mail não existe, contra um hash qualquer, para o tempo de resposta não revelar quais e-mails estão cadastrados.
