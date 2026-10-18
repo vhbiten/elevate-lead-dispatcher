@@ -41,3 +41,9 @@ Tipos de entrada: **decisão minha**, **IA errou**, **rejeitei**, **IA revisou a
 **Ambiguidades do enunciado (decisão minha).** A IA levantou os pontos em aberto (o que é lead repetido, o que é lead pendente, afiliado desconhecido, eventos fora de ordem, quem vê os números) e propôs uma resposta para cada um. Revisei e aprovei cada decisão na spec antes de qualquer código.
 
 **Algoritmo do dispatcher (IA revisou a própria proposta).** A primeira proposta foi um contador atômico apontando para uma sequência fixa de 10 posições (A, B, A, C, ...). Ao escrever a spec, a própria IA trocou por "o próximo lead vai para o call center mais atrasado em relação à sua parte", com `SELECT ... FOR UPDATE`. Motivos: a regra cabe numa função pequena testável sem banco, não exige montar e intercalar a sequência e se ajusta sozinha quando um call center é pausado ou muda de peso. Antes de escrever, a IA simulou 100 leads: ordem A, B, C, A, B, A, C, A, B, A e resultado exato de 50/30/20. Aprovei a troca junto com a spec; a regra vai ser coberta por teste unitário na fase 3.
+
+### 2026-10-18
+
+**Upsert do afiliado (IA errou; correção aprovada por mim).** No passo do `POST /api/leads`, a IA usou o `upsert` do Prisma e escreveu no comentário que ele virava `INSERT ... ON CONFLICT`. Ao preparar a idempotência, a IA conferiu o SQL no log: era um SELECT seguido de um INSERT, e 200 gravações simultâneas do mesmo afiliado novo deram 180 erros de unique.
+
+Aprovei a correção (`INSERT ... ON CONFLICT DO NOTHING`, com um teste de 10 leads simultâneos que falha no código antigo) num commit `fix:` separado, sem reescrever o histórico. O erro virou regra no `CLAUDE.md`: garantia de concorrência só vale com teste que dispara as requisições ao mesmo tempo.

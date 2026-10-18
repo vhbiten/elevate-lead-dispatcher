@@ -23,7 +23,8 @@ Regras para a IA que trabalha neste repositório.
   - `*.service.ts` tem a regra de negócio e acessa o banco pelo Prisma.
   - `*.schema.ts` tem a validação com Zod.
   - Regras puras (escolha do call center, transições de status) ficam em arquivos próprios, sem banco e sem Express, para serem testadas sozinhas.
-- SQL escrito à mão só onde a concorrência exige (`ON CONFLICT`, `FOR UPDATE`), sempre com `$queryRaw` em template literal. Nunca `$queryRawUnsafe`, nunca concatenar texto em SQL.
+- SQL escrito à mão só onde a concorrência exige (`ON CONFLICT`, `FOR UPDATE`), sempre com `$queryRaw` ou `$executeRaw` em template literal. Nunca as versões `Unsafe`, nunca concatenar texto em SQL.
+- Garantia de concorrência (unique, `ON CONFLICT`, `FOR UPDATE`) só vale com teste que dispara as requisições ao mesmo tempo. Não presuma o SQL que o ORM gera: confira no log.
 - Nomes no código em inglês; comentários e documentação em português.
 - Comentário explica o porquê, não o quê. Código óbvio não leva comentário.
 - Respostas de erro no formato da spec (`success`, `error`, `details`).
