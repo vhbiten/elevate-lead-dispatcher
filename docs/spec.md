@@ -214,9 +214,10 @@ O OPERATOR também muda status pelo painel. Essa mudança passa pelas mesmas reg
 ### Tabela de leads (ADMIN e OPERATOR)
 
 - Colunas: nome, produto, funil, origem, call center, status e data.
-- Filtros: período, produto, funil, origem, call center e status. O OPERATOR não escolhe call center: o dele é fixo.
+- Filtros: período, produto, funil, origem, call center e status. O OPERATOR não escolhe call center: o dele é fixo. O período é em datas no fuso `APP_TIMEZONE`, com o primeiro e o último dia incluídos.
 - Paginação no servidor: 20 por página, no máximo 100. O navegador nunca recebe todos os leads.
-- Ao abrir um lead: dados de contato, rastreamento (UTM, afiliado) e o histórico de status.
+- A lista não traz e-mail nem telefone. Ao abrir um lead: dados de contato, rastreamento (UTM, afiliado) e o histórico de status.
+- No painel, uma mudança de status barrada pelas regras responde `422` com o motivo e o status atual, porque quem pediu é uma pessoa e precisa ver o erro. A tentativa fica no histórico, como todo evento.
 
 ### Distribuição (só ADMIN)
 
@@ -240,6 +241,11 @@ Lista os call centers com peso, ativo ou pausado, quantos leads cada um recebeu 
 | `GET /api/options` | logado | produtos, funis e call centers para os filtros |
 
 `POST /api/leads` aceita requisições de qualquer origem (CORS aberto só nessa rota), porque as páginas de vendas ficam em outros domínios. Ela não usa cookie, então isso não abre brecha de CSRF. Os limites de requisição são configuráveis por variável de ambiente (os testes de concorrência precisam desligá-los).
+
+Formatos de resposta do painel:
+
+- Lista: `{ "success": true, "data": [...], "pagination": { "page", "page_size", "total", "total_pages" } }`.
+- Sem sessão: `401 unauthorized`. Perfil sem permissão: `403 forbidden`. Rota que não existe: `404 not_found`.
 
 ## 13. Segurança
 

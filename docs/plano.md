@@ -45,7 +45,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 ## Fase 5: acesso
 
 - [x] Login, logout e `GET /api/auth/me` (bcrypt, JWT em cookie `httpOnly`)
-- [ ] Rotas de leads (lista, detalhe e mudança de status) com escopo por perfil e call center, com testes de autorização
+- [x] Rotas de leads (lista, detalhe e mudança de status) com escopo por perfil e call center, com testes de autorização
 - [ ] Rotas do ADMIN: métricas e distribuição (ver e editar pesos)
 - [ ] Limite de tentativas no login e limite por IP no recebimento de leads
 

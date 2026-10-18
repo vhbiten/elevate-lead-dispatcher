@@ -105,3 +105,15 @@ Ficam sem índice, de propósito:
 
 - **Decisão:** `recordStatusEvent` (`src/leads/status-events.service.ts`) faz o bloqueio do lead, a decisão pela regra pura, o registro no histórico e a atualização do status. O webhook e o painel chamam a mesma função; muda só a origem do evento e o escopo.
 - **Por quê:** a spec diz que o painel segue as mesmas regras do webhook. Com uma função só, não há como as duas versões divergirem.
+
+## Escopo do OPERATOR no serviço
+
+- **Decisão:** a restrição ao call center do OPERATOR é aplicada dentro do serviço (`scopeOf` em `leads.service.ts` e o `scopeCallCenterId` do registro de eventos), e não na rota nem na tela. Lead de outro call center responde `404`, igual a um lead que não existe.
+- **Por quê:** toda consulta passa pelo serviço, então nenhuma rota nova esquece o filtro. O `404` não confirma que o lead existe.
+- **Como foi verificado:** sem o escopo, os três testes de autorização do OPERATOR falham (lista, detalhe e mudança de status).
+
+## Fuso horário sem biblioteca
+
+- **Decisão:** "hoje" e o filtro de período usam o fuso `APP_TIMEZONE`, calculado com o `Intl` do próprio Node (`src/timezone.ts`).
+- **Por quê:** é o único cálculo de data do sistema, e o `Intl` resolve sem dependência nova.
+- **Custo:** em fusos com horário de verão, o dia da troca pode sair com uma hora de diferença. O Brasil não tem horário de verão desde 2019.
