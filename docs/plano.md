@@ -29,7 +29,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 
 - [x] Função que escolhe o call center (sem banco), com testes unitários
 - [x] Distribuição dentro da transação do lead, com `SELECT ... FOR UPDATE`
-- [ ] Teste de concorrência: 100 leads simultâneos
+- [x] Teste de concorrência: 100 leads simultâneos
 
 **Pronto quando:** 100 requisições simultâneas geram 100 leads, nenhum duplicado, divididos exatamente 50/30/20.
 

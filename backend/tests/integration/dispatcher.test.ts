@@ -48,4 +48,22 @@ describe('dispatcher na gravação do lead', () => {
     expect(counters.map((callCenter) => callCenter.assigned_count)).toEqual([1, 0, 0]);
     expect(await prisma.distribution.count()).toBe(1);
   });
+
+  it('com 100 leads simultâneos, grava 100 leads divididos exatamente 50/30/20', async () => {
+    const responses = await Promise.all(
+      Array.from({ length: 100 }, (_, i) =>
+        request(app).post('/api/leads').send(validLead({ email: `simultaneo${i}@email.com` })),
+      ),
+    );
+
+    expect(responses.filter((response) => response.status === 201)).toHaveLength(100);
+    expect(new Set(responses.map((response) => response.body.lead_id)).size).toBe(100);
+    expect(await prisma.lead.count()).toBe(100);
+    expect(await prisma.distribution.count()).toBe(100);
+    expect(await leadsPerCallCenter()).toEqual({ 'cc-a': 50, 'cc-b': 30, 'cc-c': 20 });
+
+    // O contador do dispatcher bate com os leads gravados.
+    const counters = await prisma.callCenter.findMany({ orderBy: { id: 'asc' } });
+    expect(counters.map((callCenter) => callCenter.assigned_count)).toEqual([50, 30, 20]);
+  });
 });
