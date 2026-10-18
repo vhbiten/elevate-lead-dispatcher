@@ -165,4 +165,80 @@ describe('POST /api/webhooks/callcenter', () => {
       expect(lead.status).toBe('new');
     });
   });
+
+  describe('webhook repetido e fora de ordem', () => {
+    it('o mesmo webhook duas vezes grava um evento só e responde duplicate na segunda', async () => {
+      const leadId = await createLeadForCallCenterA();
+      const body = { lead_id: leadId, status: 'contacted', timestamp: at(60) };
+
+      const first = await sendWebhook(body);
+      const second = await sendWebhook(body);
+
+      expect(first.body.applied).toBe(true);
+      expect(second.status).toBe(200);
+      expect(second.body).toEqual({ success: true, duplicate: true });
+      expect(await prisma.leadStatusEvent.count({ where: { lead_id: leadId, source: 'webhook' } })).toBe(1);
+    });
+
+    it('exemplo do enunciado: contacted das 11h50 que chega depois da sale das 12h00 não desfaz a venda', async () => {
+      const leadId = await createLeadForCallCenterA();
+
+      await sendWebhook({ lead_id: leadId, status: 'sale', timestamp: at(120) });
+      const late = await sendWebhook({ lead_id: leadId, status: 'contacted', timestamp: at(60) });
+
+      expect(late.status).toBe(200);
+      expect(late.body).toEqual({ success: true, applied: false, reason: 'stale', status: 'sale' });
+      const lead = await prisma.lead.findUniqueOrThrow({
+        where: { id: leadId },
+        include: { status_events: { orderBy: { id: 'asc' } } },
+      });
+      expect(lead.status).toBe('sale');
+      // O histórico guarda tudo, aplicado ou não.
+      expect(lead.status_events.map((event) => [event.status, event.applied, event.reason])).toEqual([
+        ['new', true, null],
+        ['sale', true, null],
+        ['contacted', false, 'stale'],
+      ]);
+    });
+
+    it('contacted com horário depois da venda é registrado como transição inválida', async () => {
+      const leadId = await createLeadForCallCenterA();
+
+      await sendWebhook({ lead_id: leadId, status: 'sale', timestamp: at(60) });
+      const response = await sendWebhook({ lead_id: leadId, status: 'contacted', timestamp: at(120) });
+
+      expect(response.body).toEqual({ success: true, applied: false, reason: 'invalid_transition', status: 'sale' });
+    });
+
+    it('o mesmo webhook 10 vezes ao mesmo tempo gera um único evento e muda o status uma vez', async () => {
+      const leadId = await createLeadForCallCenterA();
+      const body = { lead_id: leadId, status: 'qualified', timestamp: at(60) };
+
+      const responses = await Promise.all(Array.from({ length: 10 }, () => sendWebhook(body)));
+
+      expect(responses.map((response) => response.status)).toEqual(Array(10).fill(200));
+      expect(responses.filter((response) => response.body.applied === true)).toHaveLength(1);
+      expect(responses.filter((response) => response.body.duplicate === true)).toHaveLength(9);
+      expect(await prisma.leadStatusEvent.count({ where: { lead_id: leadId, source: 'webhook' } })).toBe(1);
+    });
+
+    it('sale e contacted antigo chegando ao mesmo tempo terminam sempre em sale', async () => {
+      // Repete para cobrir as duas ordens de chegada.
+      for (let round = 0; round < 20; round++) {
+        const response = await request(app).post('/api/leads').send(validLead({ email: `rodada${round}@email.com` }));
+        const leadId = response.body.lead_id;
+        // Cada lead da rodada vai para um call center diferente; o webhook sai do call center certo.
+        const { call_center } = await prisma.lead.findUniqueOrThrow({ where: { id: leadId }, include: { call_center: true } });
+        const callCenter = call_center?.slug;
+
+        await Promise.all([
+          sendWebhook({ lead_id: leadId, status: 'contacted', timestamp: at(60) }, { callCenter }),
+          sendWebhook({ lead_id: leadId, status: 'sale', timestamp: at(120) }, { callCenter }),
+        ]);
+
+        const lead = await prisma.lead.findUniqueOrThrow({ where: { id: leadId } });
+        expect(lead.status).toBe('sale');
+      }
+    });
+  });
 });

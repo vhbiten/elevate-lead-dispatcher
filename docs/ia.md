@@ -47,3 +47,5 @@ Tipos de entrada: **decisão minha**, **IA errou**, **rejeitei**, **IA revisou a
 **Upsert do afiliado (IA errou; correção aprovada por mim).** No passo do `POST /api/leads`, a IA usou o `upsert` do Prisma e escreveu no comentário que ele virava `INSERT ... ON CONFLICT`. Ao preparar a idempotência, a IA conferiu o SQL no log: era um SELECT seguido de um INSERT, e 200 gravações simultâneas do mesmo afiliado novo deram 180 erros de unique.
 
 Aprovei a correção (`INSERT ... ON CONFLICT DO NOTHING`, com um teste de 10 leads simultâneos que falha no código antigo) num commit `fix:` separado, sem reescrever o histórico. O erro virou regra no `CLAUDE.md`: garantia de concorrência só vale com teste que dispara as requisições ao mesmo tempo.
+
+**Teste de corrida do webhook (IA revisou a própria proposta).** O primeiro teste com `sale` e `contacted` antigo chegando ao mesmo tempo repetia o cenário 5 vezes. Com o bloqueio do lead removido de propósito, ele falhou em só 2 de 3 execuções, ou seja, deixaria o defeito passar às vezes. A IA subiu para 20 repetições e mediu de novo: o defeito passou a ser pego em 5 de 5 execuções, e o código certo passou em 5 de 5.
