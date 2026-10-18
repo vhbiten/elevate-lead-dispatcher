@@ -246,6 +246,7 @@ Formatos de resposta do painel:
 
 - Lista: `{ "success": true, "data": [...], "pagination": { "page", "page_size", "total", "total_pages" } }`.
 - Sem sessão: `401 unauthorized`. Perfil sem permissão: `403 forbidden`. Rota que não existe: `404 not_found`.
+- `PUT /api/dispatcher` recusa com `422` um call center desconhecido (`unknown_call_center`) ou uma configuração sem nenhum call center ativo com peso maior que zero (`no_active_call_center`).
 
 ## 13. Segurança
 

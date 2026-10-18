@@ -56,6 +56,30 @@ describe('permissões por perfil e call center', () => {
     expect(lead.status).toBe('new');
   });
 
+  it('OPERATOR recebe 403 nas rotas do ADMIN', async () => {
+    const responses = await Promise.all([
+      request(app).get('/api/metrics').set('Cookie', operatorA),
+      request(app).get('/api/dispatcher').set('Cookie', operatorA),
+      request(app)
+        .put('/api/dispatcher')
+        .set('Cookie', operatorA)
+        .send({ call_centers: [{ slug: 'cc-a', weight: 100, active: true }] }),
+    ]);
+
+    for (const response of responses) {
+      expect(response.status).toBe(403);
+      expect(response.body).toEqual({ success: false, error: 'forbidden' });
+    }
+    const callCenter = await prisma.callCenter.findUniqueOrThrow({ where: { slug: 'cc-a' } });
+    expect(callCenter.weight).toBe(50);
+  });
+
+  it('sem login, as rotas do ADMIN respondem 401', async () => {
+    const responses = await Promise.all([request(app).get('/api/metrics'), request(app).get('/api/dispatcher')]);
+
+    expect(responses.map((response) => response.status)).toEqual([401, 401]);
+  });
+
   it('ADMIN vê e altera leads de qualquer call center', async () => {
     const { leadA, leadB } = await createLeadsForAandB();
 

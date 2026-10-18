@@ -1,8 +1,10 @@
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import { authRouter } from './auth/auth.routes';
+import { dispatcherRouter } from './dispatcher/dispatcher.routes';
 import { errorHandler } from './errors';
 import { leadsRouter } from './leads/leads.routes';
+import { metricsRouter } from './metrics/metrics.routes';
 import { webhooksRouter } from './webhooks/webhooks.routes';
 
 // Monta a aplicação sem abrir porta: o servidor (server.ts) e os testes usam a mesma função.
@@ -20,6 +22,8 @@ export function createApp() {
 
   app.use(authRouter);
   app.use(leadsRouter);
+  app.use(metricsRouter);
+  app.use(dispatcherRouter);
 
   app.use((_req, res) => {
     res.status(404).json({ success: false, error: 'not_found' });

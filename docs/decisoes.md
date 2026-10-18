@@ -117,3 +117,9 @@ Ficam sem índice, de propósito:
 - **Decisão:** "hoje" e o filtro de período usam o fuso `APP_TIMEZONE`, calculado com o `Intl` do próprio Node (`src/timezone.ts`).
 - **Por quê:** é o único cálculo de data do sistema, e o `Intl` resolve sem dependência nova.
 - **Custo:** em fusos com horário de verão, o dia da troca pode sair com uma hora de diferença. O Brasil não tem horário de verão desde 2019.
+
+## Métricas por contagem direta
+
+- **Decisão:** cada número do painel é um `COUNT` em `leads`, os cinco em paralelo, cada um atendido por um índice.
+- **Por quê:** simples e sempre exato. Neste volume, as contagens levam milissegundos.
+- **Custo:** com dezenas de milhões de leads, `COUNT` repetido a cada abertura do painel fica caro. O caminho seria uma tabela de totais por dia, atualizada na gravação do lead e na mudança de status (o README detalha).

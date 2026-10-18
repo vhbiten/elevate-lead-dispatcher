@@ -2,10 +2,15 @@ import type { Express } from 'express';
 import request from 'supertest';
 import { prisma } from '../../src/db';
 
-// Volta o banco de teste ao estado do seed: sem leads e com os contadores do dispatcher zerados.
+// Pesos do seed. Alguns testes mudam a configuração do dispatcher, que precisa voltar ao original.
+const SEED_WEIGHTS: Record<string, number> = { 'cc-a': 50, 'cc-b': 30, 'cc-c': 20 };
+
+// Volta o banco de teste ao estado do seed: sem leads e com o dispatcher na configuração original.
 export async function resetDatabase() {
   await prisma.$executeRaw`TRUNCATE lead_status_events, distributions, leads, affiliates RESTART IDENTITY CASCADE`;
-  await prisma.callCenter.updateMany({ data: { assigned_count: 0 } });
+  for (const [slug, weight] of Object.entries(SEED_WEIGHTS)) {
+    await prisma.callCenter.update({ where: { slug }, data: { weight, active: true, assigned_count: 0 } });
+  }
 }
 
 // Payload do exemplo do enunciado.
