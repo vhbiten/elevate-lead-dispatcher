@@ -91,7 +91,7 @@ Limites aceitos:
 
 ### Regra
 
-Cada call center tem um peso (inicialmente A = 50, B = 30, C = 20) e um contador de leads recebidos. A cada lead novo, recebe o call center que está **mais atrasado em relação à sua parte**, ou seja, o de menor `recebidos / peso`. Em caso de empate, vence o de maior peso.
+Cada call center tem um peso (inicialmente A = 50, B = 30, C = 20) e um contador de leads recebidos. A cada lead novo, recebe o call center que está **mais atrasado em relação à sua parte**, ou seja, o de menor `recebidos / peso`. Em caso de empate, vence o de maior peso e, com o mesmo peso, o de menor id. Call center com peso zero não recebe leads.
 
 Com 50/30/20, os 10 primeiros leads saem na ordem A, B, C, A, B, A, C, A, B, A: A recebe 5, B recebe 3 e C recebe 2, intercalados, sem 5 seguidos para A. Depois de 10 leads os três estão exatamente na sua parte e o ciclo se repete. É uma forma de weighted round robin: o resultado é exato e previsível, e a regra cabe numa função pequena, testada sem banco.
 
