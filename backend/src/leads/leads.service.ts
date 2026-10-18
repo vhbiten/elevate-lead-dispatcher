@@ -20,14 +20,14 @@ export async function createLead(input: LeadInput, idempotencyKey?: string): Pro
   const now = new Date();
 
   const lead = await prisma.$transaction(async (tx) => {
-    // upsert vira INSERT ... ON CONFLICT no banco: dois leads simultâneos com o mesmo afiliado novo não colidem.
-    const affiliate = input.affiliate_id
-      ? await tx.affiliate.upsert({
-          where: { code: input.affiliate_id },
-          update: {},
-          create: { code: input.affiliate_id },
-        })
-      : null;
+    let affiliateId: number | undefined;
+    if (input.affiliate_id) {
+      // SQL à mão: o upsert do Prisma faz SELECT e depois INSERT, e dois leads simultâneos com o
+      // mesmo afiliado novo colidiriam no unique. O ON CONFLICT deixa o banco resolver a corrida.
+      await tx.$executeRaw`INSERT INTO affiliates (code) VALUES (${input.affiliate_id}) ON CONFLICT (code) DO NOTHING`;
+      const affiliate = await tx.affiliate.findUniqueOrThrow({ where: { code: input.affiliate_id } });
+      affiliateId = affiliate.id;
+    }
 
     return tx.lead.create({
       data: {
@@ -37,7 +37,7 @@ export async function createLead(input: LeadInput, idempotencyKey?: string): Pro
         phone: input.phone,
         product_id: product.id,
         funnel_id: funnel.id,
-        affiliate_id: affiliate?.id,
+        affiliate_id: affiliateId,
         source: input.source,
         campaign: input.campaign,
         utm_source: input.utm?.source,

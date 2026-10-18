@@ -70,7 +70,7 @@ A diferença entre 400 e 422: 400 é "não entendi o que você mandou"; 422 é "
 
 ### Afiliado
 
-Se o `affiliate_id` ainda não existe no banco, ele é criado na hora. Os afiliados nascem em outra plataforma; recusar o lead porque o afiliado não está cadastrado aqui seria perder uma venda por um problema de cadastro.
+Se o `affiliate_id` ainda não existe no banco, ele é criado na hora, uma vez só, mesmo que vários leads com o mesmo afiliado novo cheguem juntos. Os afiliados nascem em outra plataforma; recusar o lead porque o afiliado não está cadastrado aqui seria perder uma venda por um problema de cadastro.
 
 ## 6. Lead repetido (idempotência)
 

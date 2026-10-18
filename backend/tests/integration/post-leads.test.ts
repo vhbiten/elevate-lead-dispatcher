@@ -109,4 +109,15 @@ describe('POST /api/leads', () => {
     expect(response.body).toEqual({ success: false, error: 'unknown_funnel' });
     expect(await prisma.lead.count()).toBe(0);
   });
+
+  it('aceita leads simultâneos com o mesmo afiliado novo e cria o afiliado uma vez', async () => {
+    const responses = await Promise.all(
+      Array.from({ length: 10 }, (_, i) =>
+        request(app).post('/api/leads').send(validLead({ email: `lead${i}@email.com`, affiliate_id: 'novo-777' })),
+      ),
+    );
+
+    expect(responses.map((response) => response.status)).toEqual(Array(10).fill(201));
+    expect(await prisma.affiliate.count({ where: { code: 'novo-777' } })).toBe(1);
+  });
 });
