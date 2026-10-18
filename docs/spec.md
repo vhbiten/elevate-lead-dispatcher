@@ -79,7 +79,7 @@ A mesma requisição pode chegar mais de uma vez: clique duplo, página recarreg
 - Se a página manda o cabeçalho `Idempotency-Key`, a chave é esse valor.
 - Se não manda, a chave é calculada: e-mail + produto + funil + data do dia (UTC).
 
-Na gravação, o banco recusa a segunda chave igual (`INSERT ... ON CONFLICT DO NOTHING`). Quando isso acontece, a API busca o lead que já existe e devolve o mesmo `lead_id`. Como quem decide é o banco, duas requisições iguais chegando ao mesmo tempo não criam dois leads.
+Na gravação, a restrição unique faz o banco recusar a segunda chave igual. A transação do lead é desfeita inteira, e a API busca o lead que já existe e devolve o mesmo `lead_id`. Como quem decide é o banco, duas requisições iguais chegando ao mesmo tempo não criam dois leads: a segunda espera a primeira terminar e então é recusada.
 
 Limites aceitos:
 

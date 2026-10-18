@@ -72,3 +72,9 @@ Ficam sem índice, de propósito:
 - **Decisão:** os testes de integração chamam a API com supertest e gravam num Postgres de verdade: o banco `elevate_test`, no mesmo container do compose, criado por `backend/prisma/create-test-db.sql` quando o volume nasce. Antes da suíte, as migrations e o seed são aplicados nele. Cada teste começa com as tabelas de lead vazias (`TRUNCATE`), e os arquivos rodam um de cada vez, porque dividem o banco.
 - **Por quê:** o que mais importa testar aqui (unicidade, transações, concorrência) é comportamento do banco. Um mock ou um banco em memória aprovaria código que falha no Postgres.
 - **Organização:** o Vitest tem dois projetos. `unit` cobre regras puras e roda sem Docker (`npm run test:unit`); `integration` precisa do banco no ar (`npm test` roda os dois).
+
+## Corridas na gravação do lead: quem resolve é o banco
+
+- **Lead repetido:** a `dedup_key` tem restrição unique. Duas requisições iguais ao mesmo tempo tentam gravar, o Postgres faz a segunda esperar a primeira e então recusa a segunda (erro `P2002` no Prisma). A API desfaz a transação e devolve o lead que já existe. Não há "consulta antes de gravar", que deixaria uma janela entre a consulta e o INSERT.
+- **Afiliado novo:** é criado com `INSERT ... ON CONFLICT (code) DO NOTHING`, seguido de uma busca pelo código. O `upsert` do Prisma não serve aqui: ele faz um SELECT e depois um INSERT, e num teste com 200 gravações simultâneas do mesmo afiliado novo, 180 falharam com erro de unique.
+- **Custo:** o caso repetido gasta uma transação desfeita e uma consulta a mais. É o caso raro, e o caminho comum (lead novo) não paga nada por isso.

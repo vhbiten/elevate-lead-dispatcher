@@ -121,3 +121,61 @@ describe('POST /api/leads', () => {
     expect(await prisma.affiliate.count({ where: { code: 'novo-777' } })).toBe(1);
   });
 });
+
+describe('POST /api/leads com lead repetido', () => {
+  it('devolve 200 com o lead original quando a mesma requisição chega de novo', async () => {
+    const first = await request(app).post('/api/leads').send(validLead());
+    const second = await request(app).post('/api/leads').send(validLead());
+
+    expect(first.status).toBe(201);
+    expect(second.status).toBe(200);
+    expect(second.body).toEqual({ success: true, lead_id: first.body.lead_id, duplicate: true });
+    expect(await prisma.lead.count()).toBe(1);
+    expect(await prisma.leadStatusEvent.count()).toBe(1);
+  });
+
+  it('trata como repetido o mesmo e-mail no mesmo funil, mesmo com outros dados', async () => {
+    const first = await request(app).post('/api/leads').send(validLead());
+    const second = await request(app)
+      .post('/api/leads')
+      .send(validLead({ name: 'João S.', email: 'JOAO@email.com', phone: '+5511888888888' }));
+
+    expect(second.status).toBe(200);
+    expect(second.body.lead_id).toBe(first.body.lead_id);
+  });
+
+  it('cria outro lead quando muda o funil', async () => {
+    await request(app).post('/api/leads').send(validLead());
+    const otherFunnel = await request(app).post('/api/leads').send(validLead({ funnel: 'quiz-01' }));
+
+    expect(otherFunnel.status).toBe(201);
+    expect(await prisma.lead.count()).toBe(2);
+  });
+
+  it('com Idempotency-Key, repete pelo cabeçalho e não pelo conteúdo', async () => {
+    const first = await request(app).post('/api/leads').set('Idempotency-Key', 'pedido-1').send(validLead());
+    // Mesma chave e outro conteúdo: devolve o original.
+    const sameKey = await request(app)
+      .post('/api/leads')
+      .set('Idempotency-Key', 'pedido-1')
+      .send(validLead({ email: 'maria@email.com' }));
+    // Mesmo conteúdo e outra chave: lead novo.
+    const otherKey = await request(app).post('/api/leads').set('Idempotency-Key', 'pedido-2').send(validLead());
+
+    expect(sameKey.status).toBe(200);
+    expect(sameKey.body.lead_id).toBe(first.body.lead_id);
+    expect(otherKey.status).toBe(201);
+    expect(await prisma.lead.count()).toBe(2);
+  });
+
+  it('com 10 requisições iguais ao mesmo tempo, grava um lead só', async () => {
+    const responses = await Promise.all(
+      Array.from({ length: 10 }, () => request(app).post('/api/leads').send(validLead())),
+    );
+
+    const statuses = responses.map((response) => response.status).sort();
+    expect(statuses).toEqual([200, 200, 200, 200, 200, 200, 200, 200, 200, 201]);
+    expect(new Set(responses.map((response) => response.body.lead_id)).size).toBe(1);
+    expect(await prisma.lead.count()).toBe(1);
+  });
+});

@@ -24,5 +24,11 @@ leadsRouter.post('/api/leads', async (req, res) => {
     return;
   }
 
+  if (result.duplicate) {
+    // Repetição da mesma requisição: devolve o lead original, sem criar outro (docs/spec.md, seção 6).
+    res.status(200).json({ success: true, lead_id: result.leadId, duplicate: true });
+    return;
+  }
+
   res.status(201).json({ success: true, lead_id: result.leadId });
 });

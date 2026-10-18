@@ -21,7 +21,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 
 - [x] Validação do payload com Zod, com testes unitários
 - [x] `POST /api/leads` grava o lead com produto, funil, afiliado e origem, com teste de integração
-- [ ] Lead repetido devolve o original (chave de duplicidade), com testes
+- [x] Lead repetido devolve o original (chave de duplicidade), com testes
 
 **Pronto quando:** lead válido gera `201`, repetido gera `200` com o mesmo id, inválido gera `400` ou `422`.
 
