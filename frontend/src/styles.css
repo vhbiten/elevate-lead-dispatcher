@@ -1,0 +1,646 @@
+/* Painel de operação: denso e legível. Uma cor de destaque para ação e cores de status com significado. */
+
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --ink: #161b26;
+  --muted: #5d6677;
+  --line: #e2e5ea;
+  --topbar: #10151f;
+  --accent: #0e7a6d;
+  --accent-strong: #0a5f55;
+  --danger: #a3202f;
+  --ok: #136c3c;
+  --radius: 8px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* ---------- marca e barra superior ---------- */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.brand-dark {
+  color: var(--ink);
+}
+
+.brand-product {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+/* Duas barras de alturas diferentes: a ideia de dividir o volume em partes. */
+.brand-mark {
+  width: 14px;
+  height: 14px;
+  background:
+    linear-gradient(var(--accent), var(--accent)) left bottom / 6px 14px no-repeat,
+    linear-gradient(#5fd3c4, #5fd3c4) right bottom / 6px 9px no-repeat;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  height: 56px;
+  padding: 0 28px;
+  background: var(--topbar);
+  color: #c9cfda;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  height: 100%;
+}
+
+.tab {
+  height: 100%;
+  padding: 0 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #aab2c0;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: #fff;
+}
+
+.tab.active {
+  color: #fff;
+  border-bottom-color: #5fd3c4;
+}
+
+.session {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.session-user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.25;
+  color: #fff;
+}
+
+.session-user small {
+  color: #aab2c0;
+}
+
+.topbar .button.ghost {
+  border-color: #2c3443;
+  color: #c9cfda;
+}
+
+/* ---------- conteúdo ---------- */
+
+.content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.page-title {
+  margin: 0 0 20px;
+  font-size: 22px;
+  font-weight: 650;
+}
+
+.page-scope {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.page-intro {
+  max-width: 720px;
+  margin: -8px 0 20px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.table td.strong {
+  white-space: nowrap;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.empty {
+  padding: 24px;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ---------- botões e formulários ---------- */
+
+.button {
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 550;
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.button.primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.button.primary:not(:disabled):hover {
+  background: var(--accent-strong);
+}
+
+.button.ghost {
+  background: transparent;
+  border-color: var(--line);
+}
+
+.button.ghost:not(:disabled):hover {
+  border-color: var(--muted);
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='date'],
+input[type='number'],
+select {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.form-error,
+.form-ok {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.form-error {
+  color: var(--danger);
+}
+
+.form-ok {
+  color: var(--ok);
+}
+
+/* ---------- login ---------- */
+
+.login {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background: var(--topbar);
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 32px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.login-card h1 {
+  margin: 8px 0 4px;
+  font-size: 20px;
+}
+
+.login-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.login-card .button {
+  margin-top: 6px;
+  height: 40px;
+}
+
+/* ---------- números do painel ---------- */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.metric-value {
+  font-size: 34px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.metric-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ---------- filtros e tabela ---------- */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.filters input[type='text'] {
+  width: 140px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table .number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.table tr.clickable {
+  cursor: pointer;
+}
+
+.table tr.clickable:hover td {
+  background: #f8f9fb;
+}
+
+.table tr.inactive td {
+  color: var(--muted);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.pager-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* ---------- status ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Novo: azul. Em trabalho: âmbar. Qualificado: violeta. Venda: verde. Reembolso: vermelho. Inválido: cinza. */
+.badge-new {
+  background: #e8eefc;
+  color: #2647a8;
+}
+
+.badge-contacted,
+.badge-no_answer,
+.badge-callback {
+  background: #fdf2dc;
+  color: #8a5a00;
+}
+
+.badge-qualified {
+  background: #efe9fd;
+  color: #5b3db5;
+}
+
+.badge-sale {
+  background: #e1f5ea;
+  color: #136c3c;
+}
+
+.badge-refund {
+  background: #fde8ea;
+  color: #a3202f;
+}
+
+.badge-invalid {
+  background: #eceef1;
+  color: #59606c;
+}
+
+/* ---------- detalhe do lead ---------- */
+
+.drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 21, 31, 0.35);
+}
+
+.drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(520px, 100vw);
+  height: 100%;
+  padding: 28px;
+  overflow-y: auto;
+  background: var(--surface);
+  box-shadow: -8px 0 24px rgba(16, 21, 31, 0.12);
+}
+
+.drawer-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.drawer-close:hover {
+  background: var(--bg);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 40px;
+}
+
+.drawer-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.drawer h3 {
+  margin: 28px 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px 12px;
+  margin: 18px 0 0;
+}
+
+.facts dt {
+  color: var(--muted);
+}
+
+.facts dd {
+  margin: 0;
+  word-break: break-word;
+}
+
+.utm {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.status-form {
+  display: flex;
+  gap: 8px;
+}
+
+.status-form select {
+  flex: 1;
+}
+
+.timeline {
+  margin: 0;
+  padding: 0 0 0 18px;
+  list-style: none;
+  border-left: 2px solid var(--line);
+}
+
+.timeline li {
+  position: relative;
+  padding: 0 0 16px 14px;
+}
+
+/* Ponto cheio: evento aplicado. Ponto vazio: registrado, mas sem mudar o status. */
+.timeline li::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: -25px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.timeline li.not-applied::before {
+  border-color: #b3bac6;
+  background: var(--surface);
+}
+
+.timeline li.not-applied .timeline-head strong {
+  color: var(--muted);
+}
+
+.timeline-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.timeline-meta {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.timeline-reason {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--danger);
+}
+
+/* ---------- distribuição ---------- */
+
+.weight-input {
+  width: 84px;
+}
+
+.shares {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 260px;
+}
+
+.share-row {
+  display: grid;
+  grid-template-columns: 74px 1fr 52px;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.share-label {
+  color: var(--muted);
+}
+
+.share-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.share-bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.share-bar.target {
+  background: #9aa3b2;
+}
+
+.share-bar.actual {
+  background: var(--accent);
+}
+
+.share-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.actions .form-ok,
+.actions .form-error {
+  margin: 0;
+}

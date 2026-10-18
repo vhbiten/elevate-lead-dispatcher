@@ -29,6 +29,7 @@ Regras para a IA que trabalha neste repositório.
 - Comentário explica o porquê, não o quê. Código óbvio não leva comentário.
 - Respostas de erro no formato da spec (`success`, `error`, `details`).
 - Não adicione dependência sem dizer para que serve e esperar aprovação.
+- Frontend (`frontend/`): componentes de função, chamadas à API só pelo `api.ts`, sem regra de negócio na tela. A tela esconde o que o perfil não usa, mas quem decide permissão e transição de status é a API.
 
 ## Processo
 

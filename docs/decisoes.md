@@ -129,3 +129,9 @@ Ficam sem índice, de propósito:
 - **Decisão:** `express-rate-limit` com o armazenamento padrão (memória). O login conta só tentativas erradas, por IP e e-mail. O recebimento de leads conta por IP, com padrão de 120 por minuto, configurável (`LEADS_RATE_LIMIT_PER_MINUTE`; zero desliga, como nos testes de concorrência).
 - **Por quê:** resolve o abuso simples sem nenhuma peça a mais. O limite do recebimento é folgado porque operadoras móveis põem muitos clientes atrás do mesmo IP (CGNAT), e recusar lead verdadeiro custa venda.
 - **Custo:** com várias instâncias da API, cada uma conta separado; o contador iria para um armazenamento compartilhado (Redis). Atrás de um proxy, a variável `TRUST_PROXY` faz o Express usar o IP real do cliente.
+
+## Frontend: React sem roteador nem biblioteca de componentes
+
+- **Decisão:** React com Vite, navegação por abas no estado do `App`, chamadas à API por um `api.ts` com `fetch` e CSS próprio. Nenhuma regra de negócio na tela: a tela esconde o que o perfil não usa, e a API decide permissão e transição de status (uma mudança barrada volta como erro e aparece na tela).
+- **Por quê:** são quatro telas atrás de login. Roteador, biblioteca de componentes e gerenciador de estado seriam dependências para manter sem necessidade neste tamanho.
+- **Custo:** as telas não têm URL própria (recarregar a página volta para a aba inicial, e não dá para mandar o link de um lead). Com mais telas, entraria o `react-router`.

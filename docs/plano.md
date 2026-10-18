@@ -53,10 +53,10 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 
 ## Fase 6: frontend
 
-- [ ] React com Vite e tela de login
-- [ ] Painel com os números
-- [ ] Tabela de leads com filtros, paginação e detalhe do lead
-- [ ] Tela de distribuição (ADMIN)
+- [x] React com Vite e tela de login
+- [x] Painel com os números
+- [x] Tabela de leads com filtros, paginação e detalhe do lead
+- [x] Tela de distribuição (ADMIN)
 - [ ] Frontend no Docker Compose (nginx serve o front e repassa `/api` para o backend)
 
 **Pronto quando:** ADMIN e OPERATOR fazem login pelo navegador e cada um vê só o que pode.
