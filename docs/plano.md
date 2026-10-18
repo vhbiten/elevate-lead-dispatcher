@@ -35,7 +35,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 
 ## Fase 4: webhook do call center
 
-- [ ] Regras de transição de status (sem banco), com testes unitários
+- [x] Regras de transição de status (sem banco), com testes unitários
 - [ ] `POST /api/webhooks/callcenter` atualiza o lead e grava o histórico, com teste de integração
 - [ ] Assinatura HMAC e script que assina e envia webhooks de teste (`scripts/`)
 - [ ] Webhook repetido e evento fora de ordem, com testes (inclusive o mesmo webhook 10 vezes ao mesmo tempo)

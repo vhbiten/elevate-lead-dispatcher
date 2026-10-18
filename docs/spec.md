@@ -175,7 +175,7 @@ Um evento `new` nunca muda o status. Ele só é registrado, como confirmação d
 
 Todo evento é guardado no histórico com o `timestamp` que o call center informou. O status atual só muda quando as duas condições são verdadeiras:
 
-1. O evento é **mais recente** que o último evento aplicado ao lead.
+1. O evento é **mais recente** que o último evento aplicado ao lead. Um evento com o mesmo horário não conta como mais recente.
 2. A transição é **permitida** pela tabela acima.
 
 Exemplo do enunciado: `sale` às 12h00 e depois chega um `contacted` das 11h50. O `contacted` é mais antigo, então entra no histórico com `applied = false` e o motivo `stale`, e o lead continua `sale`. Se o `contacted` viesse com horário depois da venda, seria barrado pela regra 2 (`sale` só vai para `refund`), com o motivo `invalid_transition`.
