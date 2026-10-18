@@ -16,6 +16,8 @@ export default defineConfig({
           env: {
             DATABASE_URL: TEST_DATABASE_URL,
             JWT_SECRET: 'test-only-secret',
+            // Limite do POST /api/leads desligado: os testes de concorrência mandam 100 leads do mesmo IP.
+            LEADS_RATE_LIMIT_PER_MINUTE: '0',
           },
           globalSetup: ['tests/integration/global-setup.ts'],
           setupFiles: ['tests/integration/setup.ts'],

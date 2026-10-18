@@ -193,7 +193,7 @@ O OPERATOR também muda status pelo painel. Essa mudança passa pelas mesmas reg
 - O ADMIN não tem call center. O OPERATOR tem exatamente um.
 - **Toda checagem acontece no backend.** As rotas administrativas exigem ADMIN. Toda consulta de leads feita por OPERATOR recebe o filtro do call center dele dentro do próprio serviço, e não na tela.
 - Um OPERATOR que tenta abrir um lead de outro call center recebe `404`, igual a um lead que não existe. Um OPERATOR que chama uma rota de ADMIN recebe `403`.
-- O login tem limite de tentativas: 5 a cada 15 minutos para o mesmo IP e e-mail.
+- O login tem limite de tentativas: 5 erradas a cada 15 minutos para o mesmo IP e e-mail. Login certo não conta, e errar a senha de um e-mail não bloqueia outro usuário no mesmo IP.
 - A sessão não é revogada no servidor: o logout apaga o cookie, e um token copiado antes disso vale até expirar. Por isso a duração é curta (8 horas).
 
 ## 11. Painel
@@ -256,7 +256,7 @@ Formatos de resposta do painel:
 | XSS | o React escapa o que exibe; a API não devolve HTML; cabeçalhos do `helmet` |
 | CSRF | cookie `SameSite=Strict`, front e API na mesma origem, API só aceita JSON |
 | Força bruta | limite de tentativas no login |
-| Abuso do recebimento | limite por IP em `POST /api/leads` |
+| Abuso do recebimento | limite por IP em `POST /api/leads` (padrão de 120 por minuto: operadoras móveis põem muitos clientes atrás do mesmo IP) |
 | Webhook falso | HMAC com segredo por call center e janela de 5 minutos |
 | Acesso indevido | perfil e call center conferidos no backend em toda rota |
 | Exposição de dados | a API nunca devolve hash de senha nem segredo de webhook; erros sem stack trace; logs não registram o corpo das requisições |

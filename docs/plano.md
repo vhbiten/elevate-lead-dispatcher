@@ -47,7 +47,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 - [x] Login, logout e `GET /api/auth/me` (bcrypt, JWT em cookie `httpOnly`)
 - [x] Rotas de leads (lista, detalhe e mudança de status) com escopo por perfil e call center, com testes de autorização
 - [x] Rotas do ADMIN: métricas e distribuição (ver e editar pesos)
-- [ ] Limite de tentativas no login e limite por IP no recebimento de leads
+- [x] Limite de tentativas no login e limite por IP no recebimento de leads
 
 **Pronto quando:** OPERATOR recebe `403` em rota de ADMIN e `404` em lead de outro call center, testado pela API e não pela tela.
 

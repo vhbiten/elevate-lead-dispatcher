@@ -123,3 +123,9 @@ Ficam sem índice, de propósito:
 - **Decisão:** cada número do painel é um `COUNT` em `leads`, os cinco em paralelo, cada um atendido por um índice.
 - **Por quê:** simples e sempre exato. Neste volume, as contagens levam milissegundos.
 - **Custo:** com dezenas de milhões de leads, `COUNT` repetido a cada abertura do painel fica caro. O caminho seria uma tabela de totais por dia, atualizada na gravação do lead e na mudança de status (o README detalha).
+
+## Limites de requisição na memória do processo
+
+- **Decisão:** `express-rate-limit` com o armazenamento padrão (memória). O login conta só tentativas erradas, por IP e e-mail. O recebimento de leads conta por IP, com padrão de 120 por minuto, configurável (`LEADS_RATE_LIMIT_PER_MINUTE`; zero desliga, como nos testes de concorrência).
+- **Por quê:** resolve o abuso simples sem nenhuma peça a mais. O limite do recebimento é folgado porque operadoras móveis põem muitos clientes atrás do mesmo IP (CGNAT), e recusar lead verdadeiro custa venda.
+- **Custo:** com várias instâncias da API, cada uma conta separado; o contador iria para um armazenamento compartilhado (Redis). Atrás de um proxy, a variável `TRUST_PROXY` faz o Express usar o IP real do cliente.
