@@ -100,3 +100,8 @@ Ficam sem índice, de propósito:
 - **Por quê:** é o que a spec pede, e dispensa uma tabela de sessões. O cookie `httpOnly` deixa o token fora do alcance do JavaScript da página; o `SameSite=Strict` impede que outro site use a sessão.
 - **Custo:** não dá para derrubar uma sessão antes de ela expirar. Se um usuário for removido ou mudar de perfil, o token antigo continua valendo até 8 horas (só o `GET /api/auth/me` confere o usuário no banco). Para revogação imediata, entraria uma lista de tokens revogados ou uma tabela de sessões.
 - **E-mail inexistente:** o login roda o bcrypt mesmo quando o e-mail não existe, contra um hash qualquer, para o tempo de resposta não revelar quais e-mails estão cadastrados.
+
+## Mudança de status pelo painel e pelo webhook: uma função só
+
+- **Decisão:** `recordStatusEvent` (`src/leads/status-events.service.ts`) faz o bloqueio do lead, a decisão pela regra pura, o registro no histórico e a atualização do status. O webhook e o painel chamam a mesma função; muda só a origem do evento e o escopo.
+- **Por quê:** a spec diz que o painel segue as mesmas regras do webhook. Com uma função só, não há como as duas versões divergirem.

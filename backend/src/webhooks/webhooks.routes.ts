@@ -2,7 +2,7 @@ import express, { Router } from 'express';
 import { formatValidationError } from '../validation';
 import { verifyWebhookSignature } from './verify-signature';
 import { statusEventSchema } from './webhooks.schema';
-import { recordStatusEvent } from './webhooks.service';
+import { recordWebhookEvent } from './webhooks.service';
 
 export const webhooksRouter = Router();
 
@@ -32,7 +32,7 @@ webhooksRouter.post(
       return;
     }
 
-    const result = await recordStatusEvent(res.locals.callCenterId, parsed.data);
+    const result = await recordWebhookEvent(res.locals.callCenterId, parsed.data);
     if (!result.ok) {
       res.status(404).json({ success: false, error: result.error });
       return;
