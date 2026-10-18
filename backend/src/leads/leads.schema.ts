@@ -1,18 +1,8 @@
 import { z } from 'zod';
+import { optionalText } from '../validation';
 
 // Telefone no formato internacional E.164: "+", código do país (não começa com 0) e até 15 dígitos.
 const E164_PHONE = /^\+[1-9]\d{7,14}$/;
-
-// Campo de texto opcional. Vazio, só espaços ou null contam como não enviado:
-// formulários de páginas de vendas costumam mandar "" em campos escondidos sem valor.
-function optionalText(maxLength: number) {
-  return z
-    .string()
-    .trim()
-    .max(maxLength)
-    .nullish()
-    .transform((value) => value || undefined);
-}
 
 const utmSchema = z.object({
   source: optionalText(255),

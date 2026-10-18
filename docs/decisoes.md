@@ -85,3 +85,11 @@ Ficam sem índice, de propósito:
 - **Por quê:** o estado que importa (os contadores) já está no Postgres, e o bloqueio de linha resolve a corrida sem outra peça na arquitetura. A gravação do lead, o contador e a distribuição entram ou saem juntos: um lead repetido desfaz a transação e não conta para a proporção. A ordem fixa por id impede deadlock entre duas transações.
 - **Como foi verificado:** 100 requisições simultâneas resultam em exatamente 50/30/20. Sem o `FOR UPDATE`, o mesmo teste falha (numa rodada deu 48/32/20).
 - **Custo:** as distribuições acontecem uma de cada vez. No container, 100 leads simultâneos levam cerca de 0,6 s, ou seja, uns 6 ms por lead. O pool tem 10 conexões e o Prisma espera até 2 s por uma conexão livre, então um pico bem maior que esse começaria a dar erro. O README discute o caminho para volume alto.
+
+## Webhook: corpo bruto, bloqueio do lead e evento único
+
+- **Corpo bruto:** a rota do webhook usa `express.raw()` e é montada antes do `express.json()`. A assinatura é conferida sobre os bytes exatos que o call center enviou; ler o JSON e serializar de novo poderia mudar espaços ou a ordem dos campos e invalidar uma assinatura correta. O JSON só é lido depois da assinatura.
+- **Bloqueio do lead:** o processamento faz `SELECT ... FOR UPDATE` na linha do lead. Sem isso, uma `sale` e um `contacted` antigo chegando juntos leriam o mesmo status, os dois seriam aplicados e o último a gravar venceria, podendo desfazer a venda. Com o bloqueio, cada webhook decide a partir do status que o anterior deixou. O bloqueio vale só para aquele lead: webhooks de leads diferentes continuam em paralelo.
+- **Evento único:** o evento é gravado com `INSERT ... ON CONFLICT (lead_id, status, occurred_at) DO NOTHING RETURNING id`. Sem linha de volta, o evento é repetido e nada muda.
+- **Como foi verificado:** sem o `FOR UPDATE`, o teste de eventos simultâneos falha; sem o `ON CONFLICT`, os testes de webhook repetido falham.
+- **Custo:** o segredo de cada call center fica em texto no banco, porque o HMAC precisa dele para recalcular a assinatura. Em produção, ele ficaria criptografado no banco, ou num cofre de segredos.

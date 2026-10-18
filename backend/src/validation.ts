@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 
 export type ValidationDetail = { field: string; message: string };
 
@@ -9,4 +9,15 @@ export function formatValidationError(error: z.ZodError): ValidationDetail[] {
     field: issue.path.length > 0 ? issue.path.join('.') : 'body',
     message: issue.message,
   }));
+}
+
+// Campo de texto opcional. Vazio, só espaços ou null contam como não enviado:
+// formulários de páginas de vendas costumam mandar "" em campos escondidos sem valor.
+export function optionalText(maxLength: number) {
+  return z
+    .string()
+    .trim()
+    .max(maxLength)
+    .nullish()
+    .transform((value) => value || undefined);
 }

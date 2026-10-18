@@ -146,11 +146,13 @@ O limite no futuro existe porque um evento com data adiantada passaria a ser "o 
 
 ### Processamento
 
-1. Confere a assinatura. Falhou: `401`.
+1. Confere o call center, o `X-Timestamp` e a assinatura. Falhou: `401` com `"error": "invalid_signature"`, a mesma resposta para qualquer um dos motivos.
 2. Valida o corpo. Inválido: `400`.
-3. Busca o lead. Não existe ou é de outro call center: `404`. A resposta é a mesma nos dois casos, para não revelar que o lead existe.
-4. Grava o evento no histórico. Se o mesmo evento já existe: `200` com `"duplicate": true`, sem mudar nada.
-5. Decide se o evento muda o status atual (seção 9) e responde `200` com `"applied": true` ou `false` e o motivo.
+3. Busca o lead. Não existe ou é de outro call center: `404` com `"error": "lead_not_found"`. A resposta é a mesma nos dois casos, para não revelar que o lead existe.
+4. Grava o evento no histórico. Se o mesmo evento já existe: `200` com `{ "success": true, "duplicate": true }`, sem mudar nada.
+5. Decide se o evento muda o status atual (seção 9) e responde `200` com `"applied"`, o motivo quando não aplica e o status atual do lead. Ex.: `{ "success": true, "applied": false, "reason": "stale", "status": "sale" }`.
+
+Webhooks do mesmo lead que chegam ao mesmo tempo são processados um de cada vez (`SELECT ... FOR UPDATE` na linha do lead), e cada um decide a partir do status que o anterior deixou. Um call center pausado continua podendo enviar webhooks dos leads que já recebeu.
 
 Evento barrado pelas regras de status também responde `200`, porque ele foi recebido e registrado. Se a API respondesse erro, o call center reenviaria o mesmo evento indefinidamente.
 
