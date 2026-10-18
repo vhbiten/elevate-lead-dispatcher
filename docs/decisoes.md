@@ -78,3 +78,10 @@ Ficam sem índice, de propósito:
 - **Lead repetido:** a `dedup_key` tem restrição unique. Duas requisições iguais ao mesmo tempo tentam gravar, o Postgres faz a segunda esperar a primeira e então recusa a segunda (erro `P2002` no Prisma). A API desfaz a transação e devolve o lead que já existe. Não há "consulta antes de gravar", que deixaria uma janela entre a consulta e o INSERT.
 - **Afiliado novo:** é criado com `INSERT ... ON CONFLICT (code) DO NOTHING`, seguido de uma busca pelo código. O `upsert` do Prisma não serve aqui: ele faz um SELECT e depois um INSERT, e num teste com 200 gravações simultâneas do mesmo afiliado novo, 180 falharam com erro de unique.
 - **Custo:** o caso repetido gasta uma transação desfeita e uma consulta a mais. É o caso raro, e o caminho comum (lead novo) não paga nada por isso.
+
+## Dispatcher: bloqueio de linha no Postgres
+
+- **Decisão:** a escolha do call center acontece dentro da transação do lead, com `SELECT ... FOR UPDATE` nos call centers ativos, em ordem de id (`src/dispatcher/dispatcher.service.ts`). A regra em si é uma função pura (`pick-call-center.ts`), testada sem banco.
+- **Por quê:** o estado que importa (os contadores) já está no Postgres, e o bloqueio de linha resolve a corrida sem outra peça na arquitetura. A gravação do lead, o contador e a distribuição entram ou saem juntos: um lead repetido desfaz a transação e não conta para a proporção. A ordem fixa por id impede deadlock entre duas transações.
+- **Como foi verificado:** 100 requisições simultâneas resultam em exatamente 50/30/20. Sem o `FOR UPDATE`, o mesmo teste falha (numa rodada deu 48/32/20).
+- **Custo:** as distribuições acontecem uma de cada vez. No container, 100 leads simultâneos levam cerca de 0,6 s, ou seja, uns 6 ms por lead. O pool tem 10 conexões e o Prisma espera até 2 s por uma conexão livre, então um pico bem maior que esse começaria a dar erro. O README discute o caminho para volume alto.

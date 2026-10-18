@@ -104,6 +104,8 @@ O risco é duas requisições lerem os mesmos contadores ao mesmo tempo e escolh
 3. Soma 1 no contador dele e grava a distribuição.
 4. Fim da transação: o bloqueio é liberado, e a próxima requisição lê os contadores já atualizados.
 
+Se o lead não chega a ser gravado (por exemplo, porque é repetido), a transação é desfeita e o contador volta junto: lead repetido não conta para a proporção.
+
 Com 100 leads simultâneos, as escolhas acontecem uma de cada vez, e o resultado final é exatamente 50/30/20. O bloqueio dura só o tempo de gravar o lead (milissegundos). O custo é que as distribuições não acontecem em paralelo, o que é aceitável neste volume. O README discute o que fazer com volume muito maior.
 
 ### Configuração

@@ -1,5 +1,6 @@
 import { Prisma } from '../generated/prisma/client';
 import { prisma } from '../db';
+import { assignCallCenter } from '../dispatcher/dispatcher.service';
 import { buildDedupKey } from './dedup-key';
 import type { LeadInput } from './leads.schema';
 
@@ -32,6 +33,10 @@ export async function createLead(input: LeadInput, idempotencyKey?: string): Pro
         affiliateId = affiliate.id;
       }
 
+      // O afiliado vem antes: o bloqueio dos call centers vale daqui até o fim da transação,
+      // então quanto mais tarde ele começa, menos tempo as outras requisições esperam.
+      const callCenterId = await assignCallCenter(tx);
+
       return tx.lead.create({
         data: {
           dedup_key: dedupKey,
@@ -48,12 +53,16 @@ export async function createLead(input: LeadInput, idempotencyKey?: string): Pro
           utm_campaign: input.utm?.campaign,
           utm_content: input.utm?.content,
           utm_term: input.utm?.term,
+          call_center_id: callCenterId,
           status: 'new',
           status_updated_at: now,
           created_at: now,
-          // O histórico começa junto com o lead.
+          // O histórico de status e o de distribuições começam junto com o lead.
           status_events: {
             create: { status: 'new', occurred_at: now, source: 'system', applied: true },
+          },
+          distributions: {
+            create: { call_center_id: callCenterId, distributed_at: now },
           },
         },
       });
