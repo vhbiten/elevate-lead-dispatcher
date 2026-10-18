@@ -141,3 +141,8 @@ Ficam sem índice, de propósito:
 - **Decisão:** no Docker, um nginx serve o build do React e repassa `/api` para o backend (`http://localhost:8080`). Em desenvolvimento, o proxy do Vite faz o mesmo papel. O backend usa `TRUST_PROXY=1` para ler o IP real do cliente no `X-Forwarded-For`.
 - **Por quê:** com uma origem só, o cookie `SameSite=Strict` funciona e o painel não precisa de CORS. A imagem final do frontend leva só o nginx e os arquivos gerados, sem Node.
 - **Custo:** a porta 3000 do backend continua aberta no compose, para o recebimento de leads e os scripts. Quem chama a porta 3000 direto pode forjar o `X-Forwarded-For` e escapar do limite por IP; em produção, só o proxy ficaria exposto.
+
+## Dados de demonstração pela própria API
+
+- **Decisão:** `npm run demo` (`backend/scripts/demo-data.ts`) envia leads por `POST /api/leads` e status por webhooks assinados, como num dia de operação. Depois de criar cada lead, o script recua a data dele no banco, para espalhar os leads pelos últimos 7 dias.
+- **Por quê:** os dados passam pelo dispatcher, pela assinatura e pelas regras de status de verdade, e o painel abre com histórico para mostrar. O recuo da data é o único ajuste direto no banco, e existe só para a demonstração.
