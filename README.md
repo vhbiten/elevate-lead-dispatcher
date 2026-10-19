@@ -4,6 +4,8 @@ Recebe leads das páginas de vendas, distribui cada um entre os call centers na 
 
 O núcleo (recebimento, banco, dispatcher com concorrência e webhook) está coberto por testes contra um Postgres de verdade, inclusive com requisições simultâneas.
 
+**Demonstração em vídeo (2min30s):** [`demonstracao-painel.mp4`](https://github.com/vhbiten/elevate-lead-dispatcher/releases/download/v1.0/demonstracao-painel.mp4), anexo da release [v1.0](https://github.com/vhbiten/elevate-lead-dispatcher/releases/tag/v1.0). Mostra o painel com os dois perfis, leads e webhooks chegando ao vivo pela API (inclusive fora de ordem e repetidos), a mudança de status e a distribuição por peso.
+
 | Documento | Conteúdo |
 |---|---|
 | [`docs/spec.md`](docs/spec.md) | o comportamento do sistema: regras, respostas da API e decisões das ambiguidades do enunciado |
@@ -302,5 +304,5 @@ Numa segunda versão:
 - **Testes como critério de aceite.** Cada fase do plano tem um "pronto quando" verificável por teste. São 122, e os de integração rodam contra o Postgres de verdade, porque unicidade, transação e bloqueio são comportamento do banco.
 - **Testes de mutação nos pontos críticos.** Cada proteção foi removida de propósito, para confirmar que o teste correspondente falha sem ela: o `FOR UPDATE` do dispatcher, o `FOR UPDATE` do lead no webhook, o `ON CONFLICT` do evento, o `ON CONFLICT` do afiliado, o escopo do OPERATOR e o desempate da regra de distribuição.
 - **O comportamento real do ORM.** Onde a concorrência importa, o SQL gerado foi conferido no log, em vez de presumido.
-- **A aplicação rodando.** Os testes também rodam dentro do container, e o painel foi conferido no navegador com os dois perfis.
+- **A aplicação rodando.** Os testes também rodam dentro do container, e o painel foi conferido no navegador com os dois perfis. O vídeo de demonstração foi gravado por um roteiro do Playwright escrito pela IA, com os leads e webhooks passando pela API de verdade durante a gravação.
 - **Histórico sem passo quebrado.** Cada commit foi conferido isolado (typecheck e testes) antes do push.
