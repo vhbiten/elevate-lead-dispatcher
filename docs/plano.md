@@ -63,8 +63,8 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 
 ## Fase 7: fechamento
 
-- [ ] README completo (as seções pedidas no enunciado, índices e escalabilidade)
-- [ ] Teste do zero: clonar, `docker compose up`, rodar os testes
+- [x] README completo (as seções pedidas no enunciado, índices e escalabilidade)
+- [x] Teste do zero: clonar, `docker compose up`, rodar os testes
 - [ ] Revisão do `docs/ia.md` e da seção "Como usei IA"
 - [ ] Repositório público e link enviado
 
