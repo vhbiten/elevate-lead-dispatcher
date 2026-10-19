@@ -65,7 +65,7 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 
 - [x] README completo (as seções pedidas no enunciado, índices e escalabilidade)
 - [x] Teste do zero: clonar, `docker compose up`, rodar os testes
-- [ ] Revisão do `docs/ia.md` e da seção "Como usei IA"
+- [x] Revisão do `docs/ia.md` e da seção "Como usei IA"
 - [ ] Repositório público e link enviado
 
 ## Cronograma
@@ -77,6 +77,8 @@ O plano segue a prioridade da spec: primeiro o núcleo (fases 1 a 4), depois ace
 | Sáb 17/10 | 5 e 6 |
 | Dom 18/10 | 7 |
 | Seg 19/10 | folga e entrega |
+
+Na execução, a quinta fechou as fases 0 e 1 e os dois primeiros itens da fase 2; o domingo foi do lead repetido até o fechamento. Nenhum item da ordem de corte abaixo foi necessário.
 
 ## Se faltar tempo
 

@@ -49,3 +49,9 @@ Tipos de entrada: **decisão minha**, **IA errou**, **rejeitei**, **IA revisou a
 Aprovei a correção (`INSERT ... ON CONFLICT DO NOTHING`, com um teste de 10 leads simultâneos que falha no código antigo) num commit `fix:` separado, sem reescrever o histórico. O erro virou regra no `CLAUDE.md`: garantia de concorrência só vale com teste que dispara as requisições ao mesmo tempo.
 
 **Teste de corrida do webhook (IA revisou a própria proposta).** O primeiro teste com `sale` e `contacted` antigo chegando ao mesmo tempo repetia o cenário 5 vezes. Com o bloqueio do lead removido de propósito, ele falhou em só 2 de 3 execuções, ou seja, deixaria o defeito passar às vezes. A IA subiu para 20 repetições e mediu de novo: o defeito passou a ser pego em 5 de 5 execuções, e o código certo passou em 5 de 5.
+
+**Dependências da fase 5 (decisão minha).** A IA listou as cinco dependências de sessão e segurança (`jsonwebtoken`, `cookie-parser`, `express-rate-limit`, `helmet`, `cors`), com o papel de cada uma, e a alternativa de escrever à mão a leitura do cookie e o CORS. Aprovei as cinco: são o padrão do Express, e o código escrito à mão seria mais uma coisa para manter.
+
+**Escopo do frontend (decisão minha).** A IA ofereceu duas opções: o conjunto mínimo (React e Vite, navegação por abas) ou o mínimo com `react-router`. Escolhi o mínimo: são quatro telas atrás de login. O custo, telas sem URL própria, está nas limitações do README.
+
+**Verificação dos commits.** Cada fase foi dividida em commits por item do plano. Antes do push, cada commit foi conferido isolado num `git worktree` (typecheck e testes), para o histórico não ter nenhum passo quebrado.
